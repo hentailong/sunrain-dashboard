@@ -34,15 +34,16 @@ async def main(folder,duration):
             # Recalculate from wall time each cycle; request duration never shifts the clock.
             await asyncio.sleep(max(0,math.floor(time.time()/60)*60+60-time.time()))
             if time.monotonic()>=finish:break
+            cycle=math.floor(time.time()/60)
             if time.monotonic()>=next_slow and (slow is None or slow.done()):
                 slow=asyncio.gather(*(collect(s) for s in m.SOURCES if s not in ('dengta','kuyun')))
                 next_slow=time.monotonic()+900
             await asyncio.gather(collect('dengta'),collect('kuyun'))
             # SQLite reads occur on the event-loop thread; browser tasks cannot mutate
             # the database midway through export. Only the Git subprocess runs outside it.
-            save_snapshot(folder/'snapshot.json')
+            save_snapshot(folder/'snapshot.json',cycle)
             try:
-                await asyncio.to_thread(commit_snapshot,folder)
+                await asyncio.to_thread(commit_snapshot,folder,cycle)
                 log.info('Published minute snapshot')
             except subprocess.CalledProcessError:
                 log.warning('Publish failed; retained local snapshot for the next minute')
@@ -53,8 +54,8 @@ async def main(folder,duration):
         await m.browsers.close()
 
 
-def commit_snapshot(folder):
-    for args in [('add','snapshot.json'),('commit','-m','Update public metrics'),('push','origin','HEAD:data')]:
+def commit_snapshot(folder,cycle):
+    for args in [('add','snapshot.json'),('commit','-m','Update public metrics'),('push','--atomic','origin','HEAD:data',f'HEAD:minute-{cycle%12}')]:
         subprocess.run(['git','-C',str(folder),*args],check=True,capture_output=True)
 
 

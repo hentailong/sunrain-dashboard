@@ -76,8 +76,10 @@ def restore_snapshot(snapshot):
         if slots:save_schedule(m.DB_PATH,slots,snapshot['overview']['updated_at'])
 
 
-def save_snapshot(path):
+def save_snapshot(path, publication_minute=None):
     path=Path(path);path.parent.mkdir(parents=True,exist_ok=True)
     temporary=path.with_suffix('.tmp')
-    temporary.write_text(json.dumps(export_snapshot(),ensure_ascii=False,separators=(',',':'),allow_nan=False),encoding='utf-8')
+    snapshot=export_snapshot()
+    if publication_minute is not None:snapshot['publication_minute']=publication_minute
+    temporary.write_text(json.dumps(snapshot,ensure_ascii=False,separators=(',',':'),allow_nan=False),encoding='utf-8')
     temporary.replace(path)

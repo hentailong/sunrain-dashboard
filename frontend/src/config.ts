@@ -5,11 +5,26 @@ export const STATIC_DATA = GITHUB_DEPLOY && !import.meta.env.VITE_API_BASE;
 let snapshot: any;
 let loadedAt = 0;
 let inflight: Promise<any> | undefined;
+async function fetchSnapshot(){
+ const base=import.meta.env.VITE_DATA_URL||`${import.meta.env.BASE_URL}data/snapshot.json`;
+ if(import.meta.env.VITE_DATA_URL){
+  // Read the preceding completed minute. Twelve rotating refs outlive GitHub's
+  // five-minute branch cache without relying on rate-limited anonymous APIs.
+  const minute=Math.floor(Date.now()/60000)-1;
+  const url=base.replace(/\/(?:refs\/heads\/)?data\/snapshot\.json$/,`/minute-${minute%12}/snapshot.json`);
+  try{
+   const r=await fetch(`${url}?t=${Date.now()}`,{cache:'no-store'});
+   if(r.ok){const value=await r.json();if(value.publication_minute===minute)return value}
+  }catch{}
+ }
+ const r=await fetch(`${base}?t=${Date.now()}`,{cache:'no-store'});
+ if(!r.ok)throw new Error('数据快照读取失败');
+ return r.json();
+}
 async function readSnapshot() {
  if (snapshot && Date.now()-loadedAt<15000) return snapshot;
- if (!inflight) inflight=fetch(`${import.meta.env.VITE_DATA_URL||`${import.meta.env.BASE_URL}data/snapshot.json`}?t=${Date.now()}`,{cache:'no-store'})
-  .then(r=>{if(!r.ok)throw new Error('数据快照读取失败');return r.json()})
-  .then(value=>{snapshot=value;loadedAt=Date.now();return value}).finally(()=>{inflight=undefined});
+ if (!inflight) inflight=fetchSnapshot()
+  .then(value=>{if(!snapshot||Date.parse(value.overview.updated_at)>=Date.parse(snapshot.overview.updated_at))snapshot=value;loadedAt=Date.now();return snapshot}).finally(()=>{inflight=undefined});
  return inflight;
 }
 export async function apiFetch(input: string, init?: RequestInit): Promise<Response> {
