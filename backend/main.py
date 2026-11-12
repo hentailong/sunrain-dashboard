@@ -31,6 +31,7 @@ from backend.dengta_api import collect_dengta_api, PAGE as DENGTA_PAGE
 from backend.dengta_daily import refresh_daily, daily_data
 from backend.dengta_hourly import refresh_hourly, hourly_data
 from backend.dengta_minutes import nearest_minute, normalize_history, minute_rows
+from backend.broadcast_schedule import load as load_broadcast_schedule, refresh as refresh_broadcast_schedule
 from backend.mango_metrics import parse_play_count
 from backend.kuyun_api import collect_kuyun_api, PAGE as KUYUN_PAGE, BROADCAST
 
@@ -242,6 +243,7 @@ async def collect_one(source: str) -> bool:
         if source == 'kuyun':
             result = await collect_kuyun_api()
             store_official_result(source,TITLE,result)
+            await refresh_broadcast_schedule(DB_PATH)
             return True
         if source in ('douyin', 'dengta'):
             for drama in DRAMAS:
@@ -393,7 +395,7 @@ def sources(title: str = TITLE):
              "verified": bool(status.get(key,{}).get('last_success')) and (key!='douyin' or any(m['source']=='douyin' for m in latest)),
              "login_url": PAGES.get(key) if key not in MOBILE_ONLY else None,
              "method": 'official_browser' if key=='baidu_index' else 'official_http' if key=='weibo' else 'official_api' if key in ('yunhe','douyin','dengta','kuyun') else 'mobile_product' if key in MOBILE_ONLY else 'official_browser' if key in PAGES else 'public_http',
-             "broadcast": BROADCAST if key=='kuyun' else None,
+             "broadcast": {**BROADCAST,'schedule':load_broadcast_schedule(DB_PATH) or BROADCAST['schedule']} if key=='kuyun' else None,
              "connection": connection_info() if key=='yunhe' else None,
              "collection_interval_minutes": SOURCE_INTERVALS[key] if key in PAGES or key in ('mango','kuyun') else None,
              "next_run": (scheduler.get_job(f'collect:{key}').next_run_time.isoformat() if scheduler and scheduler.get_job(f'collect:{key}') else None),

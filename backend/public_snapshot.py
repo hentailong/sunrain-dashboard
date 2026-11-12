@@ -6,6 +6,7 @@ from pathlib import Path
 from backend import main as m
 from backend.dengta_daily import daily_data, initialize as init_daily
 from backend.dengta_hourly import hourly_data, initialize as init_hourly
+from backend.broadcast_schedule import save as save_schedule
 
 META = {'scope','frequency','statistical_date','resets_daily','sample_minute','request_started_at',
         'broadcast_id','broadcast_start','broadcast_end','programme','channel','total_episodes',
@@ -69,6 +70,10 @@ def restore_snapshot(snapshot):
         for row in snapshot['dengta_hourly']['rows']:
             conn.execute('INSERT OR REPLACE INTO dengta_hourly VALUES(?,?,?,?,?,?)',(row['day'],row['hour'],row['plays'],row.get('share'),row['collected_at'],''))
     conn.close()
+    for source in snapshot['overview']['sources']:
+        slots=source.get('broadcast',{}).get('schedule',[])
+        slots=[s for s in slots if not s.get('estimated',True)]
+        if slots:save_schedule(m.DB_PATH,slots,snapshot['overview']['updated_at'])
 
 
 def save_snapshot(path):

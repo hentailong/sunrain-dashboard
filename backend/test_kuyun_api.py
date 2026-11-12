@@ -52,7 +52,7 @@ class KuyunStorageTests(unittest.IsolatedAsyncioTestCase):
     async def test_off_air_preserves_history_without_fabricated_zero(self):
         for result in [k.parse_payload({'status': True, 'data': [ROW]}, NOW),
                        k.parse_payload({'status': True, 'data': [ROW | {'epg': '新闻联播'}]}, NOW)]:
-            with patch.object(m, 'collect_kuyun_api', new_callable=AsyncMock, return_value=result) as request:
+            with patch.object(m, 'collect_kuyun_api', new_callable=AsyncMock, return_value=result) as request, patch.object(m,'refresh_broadcast_schedule',new_callable=AsyncMock):
                 await m.collect_one('kuyun')
                 request.assert_awaited_once()
         source = next(s for s in m.sources() if s['id']=='kuyun')
