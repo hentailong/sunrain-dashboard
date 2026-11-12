@@ -78,3 +78,6 @@ html{scroll-behavior:smooth}body{background:radial-gradient(ellipse at 9% 0%,#35
 .kuyun-card-stats{display:grid;gap:5px;margin:8px 0;color:#a0aaba;font-size:10px}.kuyun-card-stats span{display:flex;justify-content:space-between;gap:5px}.kuyun-card-stats b{color:#c2e1e6}.core-metric:has(.kuyun-card-stats) .core-value{margin-bottom:5px}.broadcast-heading .metric-rank{display:inline-block;margin:6px 0 0;font-size:11px}
 
 .broadcast-reading .broadcast-unit{font-style:normal;font-size:.48em;margin-left:5px;vertical-align:baseline;font-weight:700}
+
+.hourly-summary .hourly-forecast-value{display:flex;flex-direction:column;align-items:flex-end;gap:6px;border:0;padding:0}.hourly-forecast-value>b{color:#e8c784}.hourly-forecast-value>small,.hourly-forecast-note{color:#939daf;font-size:10px;line-height:1.7}.hourly-forecast-note{margin:8px 0 0;text-align:right}
+@media(max-width:650px){.hourly-summary .hourly-forecast{align-items:flex-start;gap:10px}.hourly-forecast-value{min-width:0}.hourly-forecast-value>small{white-space:normal;text-align:right}}
