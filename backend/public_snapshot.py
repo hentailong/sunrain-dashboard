@@ -68,7 +68,7 @@ def restore_snapshot(snapshot):
             if plays and share:
                 conn.execute('INSERT OR REPLACE INTO dengta_daily VALUES(?,?,?,?,?)',(day,plays['value'],share['value'],plays['collected_at'],''))
         for row in snapshot['dengta_hourly']['rows']:
-            conn.execute('INSERT OR REPLACE INTO dengta_hourly VALUES(?,?,?,?,?,?)',(row['day'],row['hour'],row['plays'],row.get('share'),row['collected_at'],''))
+            conn.execute('INSERT OR REPLACE INTO dengta_hourly VALUES(?,?,?,?,?,?)',(row['day'],row['hour'],row['plays'],row.get('share'),row['collected_at'],'daily-total-remainder:' if row.get('calculation')=='daily_total_minus_hours_0_22' else ''))
     conn.close()
     for source in snapshot['overview']['sources']:
         slots=source.get('broadcast',{}).get('schedule',[])

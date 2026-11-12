@@ -1,7 +1,7 @@
 export type ForecastHour={hour:number,plays:number};
 
 /** Blend relative and absolute hourly changes; recent hours have more influence. */
-export function forecastDay(today:ForecastHour[],yesterday:ForecastHour[],yesterdayTotal?:number){
+export function forecastDay(today:ForecastHour[],yesterday:ForecastHour[]){
  const index=(rows:ForecastHour[])=>{
   const result=new Map<number,number>();
   for(const row of rows){
@@ -17,11 +17,6 @@ export function forecastDay(today:ForecastHour[],yesterday:ForecastHour[],yester
  if(count===24)return {available:true as const,complete:true,total:[...current.values()].reduce((a,b)=>a+b,0),remaining:0,cutoff:24};
  if(count<3)return unavailable('至少积累 3 个完整小时后预测');
  if(Array.from({length:count},(_,hour)=>hour).some(hour=>!current.has(hour)))return unavailable('今日分时存在缺口，暂不预测');
- let recoveredHour=false;
- if(previous.size===23&&yesterdayTotal!=null&&Number.isFinite(yesterdayTotal)){
-  const remainder=yesterdayTotal-[...previous.values()].reduce((a,b)=>a+b,0);
-  if(remainder>=0){const missing=Array.from({length:24},(_,h)=>h).find(h=>!previous.has(h))!;previous.set(missing,remainder);recoveredHour=true}
- }
  if(previous.size!==24)return unavailable('昨日完整分时尚未齐全，暂不预测');
  let weights=0,deltaSum=0,ratioWeights=0,ratioSum=0;
  // Six recent completed hours, with a three-hour half-life. Compute both
@@ -40,5 +35,5 @@ export function forecastDay(today:ForecastHour[],yesterday:ForecastHour[],yester
  }
  const total=[...current.values()].reduce((a,b)=>a+b,0)+remaining;
  if(!Number.isFinite(total))return unavailable('分时变化异常，暂不预测');
- return {available:true as const,complete:false,total,remaining,cutoff:count,recoveredHour};
+ return {available:true as const,complete:false,total,remaining,cutoff:count};
 }

@@ -35,6 +35,33 @@ class ParseTests(unittest.TestCase):
 
 
 class ArchiveTests(unittest.IsolatedAsyncioTestCase):
+    def test_complete_last_hour_revisions_and_official_override(self):
+        from backend.dengta_daily import initialize as daily_init
+        with tempfile.TemporaryDirectory() as directory:
+            path=Path(directory)/'test.db';h.initialize(path);daily_init(path)
+            with closing(sqlite3.connect(path)) as conn,conn:
+                conn.execute('INSERT INTO dengta_daily VALUES(?,?,?,?,?)',('2026-11-10',2400,5,NOW.isoformat(),'daily'))
+                for hour in range(23):conn.execute('INSERT INTO dengta_hourly VALUES(?,?,?,?,?,?)',('2026-11-10',hour,100,5,NOW.isoformat(),'hourly'))
+            rows=h.hourly_data(path,NOW)['rows']
+            self.assertEqual(len(rows),24);self.assertEqual(rows[-1]['plays'],100)
+            self.assertIsNone(rows[-1]['share'])
+            self.assertEqual(rows[-1]['calculation'],'daily_total_minus_hours_0_22')
+            with closing(sqlite3.connect(path)) as conn,conn:conn.execute('UPDATE dengta_daily SET plays=2450')
+            self.assertEqual(h.hourly_data(path,NOW)['rows'][-1]['plays'],150)
+            with closing(sqlite3.connect(path)) as conn,conn:conn.execute("UPDATE dengta_hourly SET plays=160,source_url='official-hour' WHERE hour=23")
+            self.assertEqual(h.hourly_data(path,NOW)['rows'][-1]['plays'],160)
+
+    def test_gaps_and_unfinished_days_are_not_completed(self):
+        from backend.dengta_daily import initialize as daily_init
+        with tempfile.TemporaryDirectory() as directory:
+            path=Path(directory)/'test.db';h.initialize(path);daily_init(path)
+            with closing(sqlite3.connect(path)) as conn,conn:
+                for day,count,total in [('2026-11-10',22,2400),('2026-11-11',23,2400),('2026-11-09',23,2000)]:
+                    conn.execute('INSERT INTO dengta_daily VALUES(?,?,?,?,?)',(day,total,5,NOW.isoformat(),'daily'))
+                    for hour in range(count):conn.execute('INSERT INTO dengta_hourly VALUES(?,?,?,?,?,?)',(day,hour,100,5,NOW.isoformat(),'hourly'))
+            h.complete_last_hour(path,NOW)
+            with closing(sqlite3.connect(path)) as conn:self.assertEqual(conn.execute('SELECT COUNT(*) FROM dengta_hourly WHERE hour=23').fetchone()[0],0)
+
     async def test_revisions_keep_yesterday_and_failure_keeps_last_success(self):
         with tempfile.TemporaryDirectory() as directory:
             path=Path(directory)/'test.db';h.initialize(path)

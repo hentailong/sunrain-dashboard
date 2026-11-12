@@ -96,14 +96,38 @@ async def refresh_hourly(path):
                          ('分时更新失败，保留此前记录：'+type(exc).__name__,current.isoformat()))
 
 
+def complete_last_hour(path, current=None):
+    """Close one missing 23:00 slot from a finished official daily total.
+
+    Keep provenance in storage; an actual hourly response always takes priority.
+    """
+    current = current or datetime.now(TZ)
+    initialize(path)
+    marker = 'daily-total-remainder:'
+    with closing(sqlite3.connect(path)) as conn, conn:
+        if not conn.execute("SELECT 1 FROM sqlite_master WHERE type='table' AND name='dengta_daily'").fetchone():return
+        for day, total, captured, url in conn.execute('SELECT day,plays,collected_at,source_url FROM dengta_daily WHERE day<?',(current.date().isoformat(),)).fetchall():
+            rows=conn.execute('SELECT hour,plays,source_url FROM dengta_hourly WHERE day=? ORDER BY hour',(day,)).fetchall()
+            known=[r for r in rows if r[0]<23]
+            last=next((r for r in rows if r[0]==23),None)
+            if [r[0] for r in known]!=list(range(23)) or (last and not last[2].startswith(marker)):continue
+            remainder=total-sum(r[1] for r in known)
+            if remainder<0:continue
+            conn.execute('INSERT INTO dengta_hourly VALUES(?,?,?,?,?,?) ON CONFLICT(day,hour) DO UPDATE SET plays=excluded.plays,collected_at=excluded.collected_at,source_url=excluded.source_url',
+                         (day,23,remainder,None,captured,marker+url))
+
+
 def hourly_data(path, current=None):
     current = current or datetime.now(TZ)
     today = current.date().isoformat()
     yesterday = (current-timedelta(days=1)).date().isoformat()
     initialize(path)
+    complete_last_hour(path,current)
     with closing(sqlite3.connect(path)) as conn, conn:
         conn.row_factory = sqlite3.Row
         rows = [dict(row) for row in conn.execute('SELECT * FROM dengta_hourly WHERE day IN (?,?) ORDER BY day,hour',(today,yesterday))]
+        for row in rows:
+            if row['source_url'].startswith('daily-total-remainder:'):row['calculation']='daily_total_minus_hours_0_22'
         status = conn.execute('SELECT * FROM dengta_hourly_status WHERE id=1').fetchone()
     return {'today': today, 'yesterday': yesterday, 'rows': rows, 'status': dict(status) if status else {'state':'pending'},
             'collection_interval_minutes':1, 'timezone':'Asia/Shanghai'}
