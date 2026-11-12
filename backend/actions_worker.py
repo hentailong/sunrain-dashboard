@@ -55,7 +55,7 @@ async def main(folder,duration):
 
 
 def commit_snapshot(folder,cycle):
-    for args in [('add','snapshot.json'),('commit','-m','Update public metrics'),('push','--atomic','origin','HEAD:data',f'HEAD:minute-{cycle%12}')]:
+    for args in [('add','snapshot.json'),('commit','-m','Update public metrics'),('push','--atomic','origin','HEAD:refs/heads/data',f'HEAD:refs/heads/minute-{cycle%12}')]:
         subprocess.run(['git','-C',str(folder),*args],check=True,capture_output=True)
 
 
