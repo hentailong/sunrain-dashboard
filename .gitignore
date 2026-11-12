@@ -1,0 +1,16 @@
+frontend/node_modules/
+frontend/dist/
+frontend/dev-server.log
+frontend/tsconfig.tsbuildinfo
+backend/__pycache__/
+backend/data.db
+backend/data.db-*
+backend/backups/
+backend/browser-profiles/
+backend/evidence/
+backend/local-secrets/
+backend/logs/
+.capture-venv/
+qa/research/
+.venv/
+backend/actions-data.db*
