@@ -2,6 +2,7 @@
 export const GITHUB_DEPLOY = import.meta.env.VITE_GITHUB_DEPLOY === 'true';
 export const API = (import.meta.env.VITE_API_BASE || 'http://localhost:8000/api').replace(/\/$/, '');
 export const STATIC_DATA = GITHUB_DEPLOY && !import.meta.env.VITE_API_BASE;
+export const COLLECTION_DELAY_NOTICE = '受 GitHub Actions 调度影响，数据更新可能延迟，请以各项统计时间为准。';
 let snapshot: any;
 let loadedAt = 0;
 let inflight: Promise<any> | undefined;
