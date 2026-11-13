@@ -191,13 +191,19 @@ body{background:#e8edeb}
 
 /* One shared 60-second clock keeps rain, clearing skies and rainbow in phase. */
 .sunshower-background{--weather-cycle:60s}
-.sunshower-cloudlight{position:absolute;inset:0;background:linear-gradient(135deg,#a0b8c42e,#829ba529);animation:sunshower-weather-cloud var(--weather-cycle) ease-in-out infinite}
+.sunshower-cloudlight{position:absolute;inset:0;background:linear-gradient(135deg,#5e77864d,#536b7b40);animation:sunshower-weather-cloud var(--weather-cycle) ease-in-out infinite}
 .sunshower-daylight{position:absolute;inset:0;animation:sunshower-weather-light var(--weather-cycle) ease-in-out infinite}
 .sunshower-rain{animation:sunshower-weather-rain var(--weather-cycle) ease-in-out infinite}
-.sunshower-rainbow{position:absolute;left:50%;top:-15px;width:max(100vw,900px);transform:translateX(-50%);opacity:0;filter:blur(5px);animation:sunshower-weather-rainbow var(--weather-cycle) ease-in-out infinite}
-.sunshower-rainbow svg{display:block;width:100%;height:auto;mask-image:linear-gradient(#000 0%,#000 28%,#0008 58%,transparent 88%)}
-@keyframes sunshower-weather-rain{0%,30%{opacity:1}42%,86%{opacity:0}100%{opacity:1}}
-@keyframes sunshower-weather-cloud{0%,30%{opacity:1}46%,80%{opacity:0}100%{opacity:1}}
-@keyframes sunshower-weather-light{0%,28%{opacity:.42}46%,80%{opacity:1}100%{opacity:.42}}
-@keyframes sunshower-weather-rainbow{0%,46%{opacity:0}58%,76%{opacity:.68}90%,100%{opacity:0}}
-@media(max-width:650px){.sunshower-rainbow{filter:blur(4px)}}
+.sunshower-rainbow{position:absolute;right:-8px;top:-12px;width:clamp(220px,28vw,420px);opacity:0;filter:blur(1.4px);animation:sunshower-weather-rainbow var(--weather-cycle) ease-in-out infinite}
+.sunshower-rainbow svg{display:block;width:100%;height:auto;mask-image:linear-gradient(to bottom,transparent 0%,#000 22%,#000 65%,transparent 100%)}
+@keyframes sunshower-weather-rain{0%,24%{opacity:1}42%,84%{opacity:0}100%{opacity:1}}
+@keyframes sunshower-weather-cloud{0%,24%{opacity:1}50%,78%{opacity:0}100%{opacity:1}}
+@keyframes sunshower-weather-light{0%,20%{opacity:.18}50%,78%{opacity:1}100%{opacity:.18}}
+@keyframes sunshower-weather-rainbow{0%,44%{opacity:0}62%,76%{opacity:.44}94%,100%{opacity:0}}
+@media(max-width:650px){.sunshower-rainbow{width:190px;right:-12px;top:-8px;filter:blur(1px)}}
+
+/* Clear skies reveal a broad warm halo; the weather layer dims it while raining. */
+.sunshower-sun{background:radial-gradient(circle,#fff2c480 0%,#edc78e45 30%,#f8e5bd18 50%,transparent 68%)}
+.sunshower-orb{box-shadow:0 0 90px 40px #fff2c480,0 0 190px 90px #e8be7a40}
+.sunshower-orb:after{background:radial-gradient(circle,#fff8dc99 0%,#f2d19066 36%,transparent 72%)}
+@media(max-width:650px){.sunshower-orb{box-shadow:0 0 65px 28px #fff2c46b,0 0 135px 55px #e8be7a38}}
