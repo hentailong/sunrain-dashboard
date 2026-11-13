@@ -288,17 +288,28 @@ body{color:var(--ink)}
 /* Off-canvas daylight and a soft trace of refracted colour, never a sun disc
    or a rainbow sticker in front of the navigation and readings. */
 .sunshower-sun{left:auto;right:-320px;top:-620px;width:1000px;height:1000px;background:radial-gradient(ellipse,#fff3d38c 0%,#f8ebcd40 35%,transparent 66%);animation-duration:16s}
-.sunshower-daylight:before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 100% 0%,#fff4c6 0%,#fff8e6cc 32%,transparent 72%),linear-gradient(130deg,#f5f5ed,#fff9eb 55%,#f7f0dd);animation:sunshower-clear-sky var(--weather-cycle) ease-in-out infinite}
+.sunshower-daylight:before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 100% 0%,#fffdf2 0%,#f8fcf7b3 22%,transparent 55%),linear-gradient(130deg,#e5f0f5,#edf6f8 55%,#daeaf1);animation:sunshower-clear-sky var(--weather-cycle) ease-in-out infinite}
 @keyframes sunshower-clear-sky{0%,20%{opacity:0}46%,80%{opacity:1}100%{opacity:0}}
-.sunshower-rays{inset:auto;right:-180px;top:-220px;width:1100px;height:1000px;transform-origin:100% 0;background:linear-gradient(125deg,transparent 28%,#fff3cb12 35%,#fff7df75 42%,#fff9e899 46%,#fff4d64d 51%,transparent 61%),linear-gradient(125deg,transparent 54%,#fff4d538 62%,#fff8e34d 65%,transparent 73%);animation:sunshower-daybeams 12s ease-in-out infinite alternate;mask-image:linear-gradient(to bottom,#000 0%,#000 30%,transparent 92%)}
-@keyframes sunshower-daybeams{from{opacity:.65;transform:translate3d(12px,-8px,0)}to{opacity:1;transform:translate3d(-18px,12px,0)}}
-.sunshower-rainbow{right:-160px;top:-100px;width:360px;filter:blur(5px);mask-image:linear-gradient(90deg,transparent,#000 50%)}
-.sunshower-rainbow svg{mask-image:linear-gradient(to bottom,transparent 22%,#000 52%,transparent 94%)}
-@keyframes sunshower-weather-rainbow{0%,44%{opacity:0}62%,76%{opacity:.35}94%,100%{opacity:0}}
+.sunshower-rays{inset:auto;right:-110px;top:-100px;width:1100px;height:1000px;transform-origin:100% 0;background:linear-gradient(125deg,transparent 24%,#e5d3ab18 28%,#fffef4d9 32%,#fffdf199 37%,transparent 44%,transparent 51%,#fffff5b3 55%,#fff7dc59 59%,transparent 65%),linear-gradient(125deg,transparent 65%,#fffef07a 68%,transparent 73%);animation:sunshower-daybeams 12s ease-in-out infinite alternate;mask-image:linear-gradient(to bottom,#000 0%,#000 35%,transparent 95%)}
+@keyframes sunshower-daybeams{from{opacity:.8;transform:translate3d(12px,-8px,0)}to{opacity:1;transform:translate3d(-18px,12px,0)}}
+.sunshower-bokeh{position:fixed;z-index:2;right:0;top:0;width:min(38vw,500px);height:650px;pointer-events:none}
+.sunshower-bokeh svg{position:absolute;width:48px;height:48px;animation:sunshower-bokeh-drift 16s ease-in-out infinite;opacity:0}
+.sunshower-bokeh svg:nth-child(1){right:30%;top:8%;width:30px;height:30px;animation-delay:-3s}
+.sunshower-bokeh svg:nth-child(2){right:12%;top:23%;width:68px;height:68px;animation-delay:-8s;animation-duration:19s}
+.sunshower-bokeh svg:nth-child(3){right:53%;top:33%;width:42px;height:42px;animation-delay:-13s;animation-duration:21s}
+.sunshower-bokeh svg:nth-child(4){right:6%;top:60%;width:34px;height:34px;animation-delay:-5s;animation-duration:18s}
+.sunshower-bokeh svg:nth-child(5){right:68%;top:69%;width:56px;height:56px;animation-delay:-11s;animation-duration:23s}
+@keyframes sunshower-bokeh-drift{0%,100%{opacity:0;transform:translate3d(12px,-14px,0) rotate(-7deg)}30%,65%{opacity:.45}80%{opacity:.15}90%{transform:translate3d(-18px,22px,0) rotate(8deg)}}
+.sunshower-rainbow{right:-20px;top:-15px;width:215px;filter:blur(1px);mask-image:linear-gradient(90deg,transparent 0%,#000 24%,#000 86%,transparent 100%)}
+.sunshower-rainbow svg{mask-image:linear-gradient(to bottom,#000 0%,#000 62%,transparent 98%)}
+@keyframes sunshower-weather-rainbow{0%,38%{opacity:0}50%,80%{opacity:.8}94%,100%{opacity:0}}
+@media(min-width:900px){.site-header{padding-right:220px}}
 @media(max-width:650px){
  .sunshower-sun{right:-250px;top:-430px;width:650px;height:650px}
- .sunshower-rays{right:-160px;top:-190px;width:720px;height:850px}
- .sunshower-rainbow{right:-170px;top:-95px;width:300px;filter:blur(5px)}
+ .sunshower-rays{right:-150px;top:-100px;width:720px;height:850px}
+ .sunshower-bokeh{width:75vw;height:520px}.sunshower-bokeh svg:nth-child(n+4){display:none}
+ .sunshower-bokeh svg:nth-child(1){right:8%;top:20%}.sunshower-bokeh svg:nth-child(2){right:-14%;top:40%}.sunshower-bokeh svg:nth-child(3){right:4%;top:78%}
+ .sunshower-rainbow{right:-24px;top:12px;width:145px;filter:blur(.8px)}
 }
 @media(max-width:760px){
  .dengta-combined h3 .metric-rank{display:inline-block;margin:0 0 0 4px;font-size:8px}
