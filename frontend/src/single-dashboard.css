@@ -83,11 +83,12 @@ html{scroll-behavior:smooth}body{background:radial-gradient(ellipse at 9% 0%,#35
 @media(max-width:650px){.hourly-summary .hourly-forecast{align-items:flex-start;gap:10px}.hourly-forecast-value{min-width:0}.hourly-forecast-value>small{white-space:normal;text-align:right}}
 /* Sunlight through a quiet shower, behind every interactive surface. */
 .single-app{position:relative;isolation:isolate;background-image:none}
-.sunshower-background{position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden;contain:strict;background:linear-gradient(120deg,#261b121c,transparent 55%,#18323d20)}
-.sunshower-sun{position:absolute;top:-200px;left:-160px;width:750px;height:750px;border-radius:50%;background:radial-gradient(circle,#efc37421 0%,#c98e4312 34%,transparent 69%);animation:sunshower-glow 22s ease-in-out infinite alternate}
-.sunshower-rays{position:absolute;inset:-30%;transform-origin:16% 0;background:conic-gradient(from 132deg at 16% 0%,transparent 0deg,#f5d69a08 7deg,transparent 13deg,#f5d69a0c 20deg,transparent 27deg,#f5d69a07 35deg,transparent 44deg);animation:sunshower-rays 28s ease-in-out infinite alternate}
+.sunshower-background{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden;contain:strict;background:linear-gradient(120deg,#261b121c,transparent 55%,#18323d20)}
+.site-header,.single-main{position:relative;z-index:1}
+.sunshower-sun{position:absolute;top:-200px;left:-160px;width:750px;height:750px;border-radius:50%;background:radial-gradient(circle,#ffe4a354 0%,#e4b15b2b 30%,#c98e4314 50%,transparent 70%);animation:sunshower-glow 12s ease-in-out infinite alternate}
+.sunshower-rays{position:absolute;inset:-30%;transform-origin:16% 0;background:conic-gradient(from 132deg at 16% 0%,transparent 0deg,#f5d69a18 7deg,transparent 13deg,#f5d69a24 20deg,transparent 27deg,#f5d69a16 35deg,transparent 44deg);animation:sunshower-rays 16s ease-in-out infinite alternate}
 .sunshower-rain{position:absolute;inset:-100px -8% 0;transform:rotate(12deg)}
-.sunshower-rain i{position:absolute;top:-90px;width:1px;background:linear-gradient(transparent,#f0d7a999,#a9c9d877);animation:sunshower-fall linear infinite;will-change:transform;border-radius:2px}
+.sunshower-rain i{position:absolute;top:-90px;width:1.5px;background:linear-gradient(transparent,#ffe8bfe6,#b6d9eacc);animation:sunshower-fall linear infinite;will-change:transform;border-radius:2px}
 @keyframes sunshower-glow{from{transform:translate3d(0,0,0) scale(1);opacity:.65}to{transform:translate3d(100px,40px,0) scale(1.12);opacity:1}}
 @keyframes sunshower-rays{from{transform:rotate(-5deg);opacity:.45}to{transform:rotate(5deg);opacity:.9}}
 @keyframes sunshower-fall{from{transform:translate3d(0,0,0)}to{transform:translate3d(0,calc(130vh + 200px),0)}}
@@ -126,7 +127,16 @@ html{scroll-behavior:smooth}body{background:radial-gradient(ellipse at 9% 0%,#35
  .dashboard-section-title:has(.collection-delay-note)>div{display:none}
 }
 @media(prefers-reduced-motion:reduce){
- .sunshower-background *{animation:none!important}
- .sunshower-rain{display:none}
+ .sunshower-background[data-motion="on"] .sunshower-sun{animation-duration:20s}
+ .sunshower-background[data-motion="on"] .sunshower-rays{animation-duration:24s}
  .core-metric{transition:none}
 }
+
+.sunshower-background[data-motion="off"] *{animation-play-state:paused!important}
+.sunshower-background[data-motion="off"] .sunshower-rain{display:none}
+.sunshower-toggle{position:fixed;z-index:5;right:20px;bottom:18px;display:flex;align-items:center;gap:8px;padding:9px 12px;border:1px solid #d0ae6e55;border-radius:24px;background:#171a23f5;box-shadow:0 4px 18px #0004;color:#d8c39e;font-size:11px;cursor:pointer}
+.sunshower-toggle>span{color:#edc17b;font-size:17px;line-height:1}
+.sunshower-toggle>i{width:6px;height:6px;border-radius:50%;background:#797e89}
+.sunshower-toggle[aria-pressed="true"]>i{background:#e9bc71;box-shadow:0 0 8px #e9bc7155}
+.site-footer{padding-bottom:48px}
+@media(max-width:650px){.sunshower-toggle{right:12px;bottom:12px;padding:8px 10px;font-size:10px}}
