@@ -288,6 +288,8 @@ body{color:var(--ink)}
 /* Off-canvas daylight and a soft trace of refracted colour, never a sun disc
    or a rainbow sticker in front of the navigation and readings. */
 .sunshower-sun{left:auto;right:-320px;top:-620px;width:1000px;height:1000px;background:radial-gradient(ellipse,#fff3d38c 0%,#f8ebcd40 35%,transparent 66%);animation-duration:16s}
+.sunshower-daylight:before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 100% 0%,#fff4c6 0%,#fff8e6cc 32%,transparent 72%),linear-gradient(130deg,#f5f5ed,#fff9eb 55%,#f7f0dd);animation:sunshower-clear-sky var(--weather-cycle) ease-in-out infinite}
+@keyframes sunshower-clear-sky{0%,20%{opacity:0}46%,80%{opacity:1}100%{opacity:0}}
 .sunshower-rays{inset:auto;right:-180px;top:-220px;width:1100px;height:1000px;transform-origin:100% 0;background:linear-gradient(125deg,transparent 28%,#fff3cb12 35%,#fff7df75 42%,#fff9e899 46%,#fff4d64d 51%,transparent 61%),linear-gradient(125deg,transparent 54%,#fff4d538 62%,#fff8e34d 65%,transparent 73%);animation:sunshower-daybeams 12s ease-in-out infinite alternate;mask-image:linear-gradient(to bottom,#000 0%,#000 30%,transparent 92%)}
 @keyframes sunshower-daybeams{from{opacity:.65;transform:translate3d(12px,-8px,0)}to{opacity:1;transform:translate3d(-18px,12px,0)}}
 .sunshower-rainbow{right:-160px;top:-100px;width:360px;filter:blur(5px);mask-image:linear-gradient(90deg,transparent,#000 50%)}

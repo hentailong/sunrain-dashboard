@@ -19,14 +19,14 @@ export function startRain(canvas:HTMLCanvasElement){
   const ratio=Math.min(window.devicePixelRatio||1,1.25,Math.sqrt(2_500_000/(width*height)));
   canvas.width=Math.round(width*ratio);canvas.height=Math.round(height*ratio);
   ctx.setTransform(ratio,0,0,ratio,0,0);
-  count=Math.min(150,Math.max(45,Math.round(width/7)));
+  count=Math.min(300,Math.max(100,Math.round(width/4)));
  };
  const draw=(time:number)=>{
   ctx.clearRect(0,0,width,height);
   const seconds=time/1000;
   for(let depth=0;depth<3;depth++){
    ctx.beginPath();ctx.lineWidth=[.5,.65,.8][depth];ctx.lineCap='round';
-   ctx.strokeStyle=['rgba(105,143,162,.16)','rgba(99,139,160,.24)','rgba(91,132,155,.34)'][depth];
+   ctx.strokeStyle=['rgba(105,143,162,.22)','rgba(99,139,160,.32)','rgba(91,132,155,.44)'][depth];
    for(let i=depth;i<count;i+=3){
     const y=((seconds*(650+(i%5)*105)+i*137)%(height+90))-60;
     const x=((i*.61803398875%1)*(width+100)-y*.12+width+100)%(width+100)-50;
