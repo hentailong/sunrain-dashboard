@@ -8,7 +8,7 @@ export const SunshowerBackground=memo(function SunshowerBackground(){
  useEffect(()=>rain.current?startRain(rain.current):undefined,[]);
  return <div className="sunshower-background" aria-hidden="true">
   <div className="sunshower-cloudlight"/>
-  <div className="sunshower-daylight"><div className="sunshower-sun"/></div>
+  <div className="sunshower-daylight"><div className="sunshower-sun"/><div className="sunshower-rays"/></div>
   <div className="sunshower-rainbow"><svg viewBox="0 0 500 330" fill="none" focusable="false">{RAINBOW_COLORS.map((color,i)=><path key={color} d={`M -60 ${80+i*5} C 245 ${20+i*5} ${400-i*5} 100 ${430-i*5} 340`} stroke={color} strokeWidth="7" strokeLinecap="round"/>)}</svg></div>
   <canvas className="sunshower-rain" ref={rain}/>
  </div>;
