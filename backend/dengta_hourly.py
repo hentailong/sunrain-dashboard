@@ -3,6 +3,7 @@ import hashlib
 import json
 import re
 import sqlite3
+from pathlib import Path
 from contextlib import closing
 from datetime import datetime, timedelta
 
@@ -117,6 +118,19 @@ def complete_last_hour(path, current=None):
                          (day,23,remainder,None,captured,marker+url))
 
 
+def restore_archived_hours(path):
+    """Seed only missing slots lost by the previous two-day snapshot exporter."""
+    initialize(path)
+    archive=Path(__file__).with_name('dengta_hourly_archive.json')
+    if not archive.exists():return
+    rows=json.loads(archive.read_text(encoding='utf-8'))['rows']
+    with closing(sqlite3.connect(path)) as conn,conn:
+        for row in rows:
+            url='daily-total-remainder:' if row.get('calculation')=='daily_total_minus_hours_0_22' else ''
+            conn.execute('INSERT OR IGNORE INTO dengta_hourly VALUES(?,?,?,?,?,?)',
+                         (row['day'],row['hour'],row['plays'],row.get('share'),row['collected_at'],url))
+
+
 def hourly_data(path, current=None):
     current = current or datetime.now(TZ)
     today = current.date().isoformat()
@@ -125,7 +139,10 @@ def hourly_data(path, current=None):
     complete_last_hour(path,current)
     with closing(sqlite3.connect(path)) as conn, conn:
         conn.row_factory = sqlite3.Row
-        rows = [dict(row) for row in conn.execute('SELECT * FROM dengta_hourly WHERE day IN (?,?) ORDER BY day,hour',(today,yesterday))]
+        # Retain completed days in snapshots so runner handoffs do not discard
+        # forecast baselines. The chart selects today/yesterday; forecasting
+        # selects recent complete days independently.
+        rows = [dict(row) for row in conn.execute('SELECT * FROM dengta_hourly WHERE day<=? ORDER BY day,hour',(today,))]
         for row in rows:
             if row['source_url'].startswith('daily-total-remainder:'):row['calculation']='daily_total_minus_hours_0_22'
         status = conn.execute('SELECT * FROM dengta_hourly_status WHERE id=1').fetchone()

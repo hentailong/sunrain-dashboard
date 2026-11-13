@@ -10,6 +10,7 @@ from pathlib import Path
 
 from backend import main as m
 from backend.public_snapshot import restore_snapshot, save_snapshot
+from backend.dengta_hourly import restore_archived_hours
 
 log=logging.getLogger('actions-collector')
 
@@ -27,6 +28,7 @@ async def main(folder,duration):
     snapshot=folder/'snapshot.json'
     if not snapshot.exists():raise RuntimeError('Missing historical snapshot; refusing to overwrite history')
     restore_snapshot(json.loads(snapshot.read_text(encoding='utf-8')))
+    restore_archived_hours(m.DB_PATH)
     finish=time.monotonic()+duration*60
     slow=None;next_slow=0
     try:

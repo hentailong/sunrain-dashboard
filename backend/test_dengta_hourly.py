@@ -35,6 +35,28 @@ class ParseTests(unittest.TestCase):
 
 
 class ArchiveTests(unittest.IsolatedAsyncioTestCase):
+    def test_archive_seed_is_idempotent_and_keeps_newer_observations(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path=Path(directory)/'test.db';h.initialize(path)
+            with closing(sqlite3.connect(path)) as conn,conn:
+                conn.execute('INSERT INTO dengta_hourly VALUES(?,?,?,?,?,?)',('2026-11-11',0,123,5,NOW.isoformat(),'newer-official'))
+            h.restore_archived_hours(path);h.restore_archived_hours(path)
+            with closing(sqlite3.connect(path)) as conn:
+                self.assertEqual(conn.execute('SELECT COUNT(*) FROM dengta_hourly').fetchone()[0],48)
+                self.assertEqual(conn.execute("SELECT plays FROM dengta_hourly WHERE day='2026-11-11' AND hour=0").fetchone()[0],123)
+                self.assertTrue(conn.execute("SELECT source_url FROM dengta_hourly WHERE day='2026-11-11' AND hour=23").fetchone()[0].startswith('daily-total-remainder:'))
+
+    def test_archive_keeps_older_days_for_forecasting_and_runner_restore(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path=Path(directory)/'test.db';h.initialize(path)
+            with closing(sqlite3.connect(path)) as conn,conn:
+                for day in ('2026-11-08','2026-11-09','2026-11-10','2026-11-11','2026-11-12'):
+                    conn.execute('INSERT INTO dengta_hourly VALUES(?,?,?,?,?,?)',(day,0,100,5,NOW.isoformat(),'hourly'))
+            result=h.hourly_data(path,NOW)
+            self.assertEqual([r['day'] for r in result['rows']],['2026-11-08','2026-11-09','2026-11-10','2026-11-11'])
+            self.assertEqual(result['today'],'2026-11-11')
+            self.assertEqual(result['yesterday'],'2026-11-10')
+
     def test_complete_last_hour_revisions_and_official_override(self):
         from backend.dengta_daily import initialize as daily_init
         with tempfile.TemporaryDirectory() as directory:
