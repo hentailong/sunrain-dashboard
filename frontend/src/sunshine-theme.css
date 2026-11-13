@@ -188,3 +188,16 @@ body{background:#e8edeb}
 .sunshower-orb:after{display:block;position:absolute;inset:-65px;border-radius:50%;background:radial-gradient(circle,#fff9e36b 0%,#f4dca538 38%,transparent 71%);mask-image:none;filter:blur(18px);animation:sunshower-bloom 12s ease-in-out infinite alternate}
 @keyframes sunshower-bloom{from{opacity:.55;transform:scale(.94)}to{opacity:.9;transform:scale(1.08)}}
 @media(max-width:650px){.sunshower-orb{box-shadow:0 0 55px 22px #fff4d445,0 0 110px 42px #eac79324}.sunshower-orb:after{inset:-45px}}
+
+/* One shared 60-second clock keeps rain, clearing skies and rainbow in phase. */
+.sunshower-background{--weather-cycle:60s}
+.sunshower-cloudlight{position:absolute;inset:0;background:linear-gradient(135deg,#a0b8c42e,#829ba529);animation:sunshower-weather-cloud var(--weather-cycle) ease-in-out infinite}
+.sunshower-daylight{position:absolute;inset:0;animation:sunshower-weather-light var(--weather-cycle) ease-in-out infinite}
+.sunshower-rain{animation:sunshower-weather-rain var(--weather-cycle) ease-in-out infinite}
+.sunshower-rainbow{position:absolute;left:50%;top:-15px;width:max(100vw,900px);transform:translateX(-50%);opacity:0;filter:blur(5px);animation:sunshower-weather-rainbow var(--weather-cycle) ease-in-out infinite}
+.sunshower-rainbow svg{display:block;width:100%;height:auto;mask-image:linear-gradient(#000 0%,#000 28%,#0008 58%,transparent 88%)}
+@keyframes sunshower-weather-rain{0%,30%{opacity:1}42%,86%{opacity:0}100%{opacity:1}}
+@keyframes sunshower-weather-cloud{0%,30%{opacity:1}46%,80%{opacity:0}100%{opacity:1}}
+@keyframes sunshower-weather-light{0%,28%{opacity:.42}46%,80%{opacity:1}100%{opacity:.42}}
+@keyframes sunshower-weather-rainbow{0%,46%{opacity:0}58%,76%{opacity:.68}90%,100%{opacity:0}}
+@media(max-width:650px){.sunshower-rainbow{filter:blur(4px)}}
