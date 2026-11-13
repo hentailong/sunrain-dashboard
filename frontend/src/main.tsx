@@ -3,6 +3,7 @@ import {createRoot} from 'react-dom/client';
 import * as echarts from 'echarts';
 import './styles.css';
 import './single-dashboard.css';
+import './sunshine-theme.css';
 import {SingleDashboard} from './single-dashboard';
 import {SunshowerBackground} from './sunshower-background';
 import {YunheHistory} from './yunhe-history';

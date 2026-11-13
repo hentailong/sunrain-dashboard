@@ -127,16 +127,5 @@ html{scroll-behavior:smooth}body{background:radial-gradient(ellipse at 9% 0%,#35
  .dashboard-section-title:has(.collection-delay-note)>div{display:none}
 }
 @media(prefers-reduced-motion:reduce){
- .sunshower-background[data-motion="on"] .sunshower-sun{animation-duration:20s}
- .sunshower-background[data-motion="on"] .sunshower-rays{animation-duration:24s}
  .core-metric{transition:none}
 }
-
-.sunshower-background[data-motion="off"] *{animation-play-state:paused!important}
-.sunshower-background[data-motion="off"] .sunshower-rain{display:none}
-.sunshower-toggle{position:fixed;z-index:5;right:20px;bottom:18px;display:flex;align-items:center;gap:8px;padding:9px 12px;border:1px solid #d0ae6e55;border-radius:24px;background:#171a23f5;box-shadow:0 4px 18px #0004;color:#d8c39e;font-size:11px;cursor:pointer}
-.sunshower-toggle>span{color:#edc17b;font-size:17px;line-height:1}
-.sunshower-toggle>i{width:6px;height:6px;border-radius:50%;background:#797e89}
-.sunshower-toggle[aria-pressed="true"]>i{background:#e9bc71;box-shadow:0 0 8px #e9bc7155}
-.site-footer{padding-bottom:48px}
-@media(max-width:650px){.sunshower-toggle{right:12px;bottom:12px;padding:8px 10px;font-size:10px}}
