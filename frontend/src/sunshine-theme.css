@@ -194,16 +194,108 @@ body{background:#e8edeb}
 .sunshower-cloudlight{position:absolute;inset:0;background:linear-gradient(135deg,#5e77864d,#536b7b40);animation:sunshower-weather-cloud var(--weather-cycle) ease-in-out infinite}
 .sunshower-daylight{position:absolute;inset:0;animation:sunshower-weather-light var(--weather-cycle) ease-in-out infinite}
 .sunshower-rain{animation:sunshower-weather-rain var(--weather-cycle) ease-in-out infinite}
-.sunshower-rainbow{position:absolute;right:-8px;top:-12px;width:clamp(220px,28vw,420px);opacity:0;filter:blur(1.4px);animation:sunshower-weather-rainbow var(--weather-cycle) ease-in-out infinite}
-.sunshower-rainbow svg{display:block;width:100%;height:auto;mask-image:linear-gradient(to bottom,transparent 0%,#000 22%,#000 65%,transparent 100%)}
+.sunshower-rainbow{position:absolute;right:clamp(16px,2vw,48px);top:18px;width:clamp(210px,24vw,360px);opacity:0;filter:none;animation:sunshower-weather-rainbow var(--weather-cycle) ease-in-out infinite}
+.sunshower-rainbow svg{display:block;width:100%;height:auto;mask-image:linear-gradient(to bottom,#000 0%,#000 75%,transparent 100%)}
 @keyframes sunshower-weather-rain{0%,24%{opacity:1}42%,84%{opacity:0}100%{opacity:1}}
 @keyframes sunshower-weather-cloud{0%,24%{opacity:1}50%,78%{opacity:0}100%{opacity:1}}
-@keyframes sunshower-weather-light{0%,20%{opacity:.18}50%,78%{opacity:1}100%{opacity:.18}}
-@keyframes sunshower-weather-rainbow{0%,44%{opacity:0}62%,76%{opacity:.44}94%,100%{opacity:0}}
-@media(max-width:650px){.sunshower-rainbow{width:190px;right:-12px;top:-8px;filter:blur(1px)}}
+@keyframes sunshower-weather-light{0%,20%{opacity:.72}50%,78%{opacity:1}100%{opacity:.72}}
+@keyframes sunshower-weather-rainbow{0%,44%{opacity:0}62%,76%{opacity:.72}94%,100%{opacity:0}}
+@media(max-width:650px){.sunshower-rainbow{width:165px;right:12px;top:16px;filter:none}}
 
 /* Clear skies reveal a broad warm halo; the weather layer dims it while raining. */
 .sunshower-sun{background:radial-gradient(circle,#fff2c480 0%,#edc78e45 30%,#f8e5bd18 50%,transparent 68%)}
 .sunshower-orb{box-shadow:0 0 90px 40px #fff2c480,0 0 190px 90px #e8be7a40}
 .sunshower-orb:after{background:radial-gradient(circle,#fff8dc99 0%,#f2d19066 36%,transparent 72%)}
 @media(max-width:650px){.sunshower-orb{box-shadow:0 0 65px 28px #fff2c46b,0 0 135px 55px #e8be7a38}}
+
+/* Visible rain at wide viewports, with a brighter leading edge and varied depth. */
+.sunshower-rain i{background:linear-gradient(180deg,transparent 0%,#496d87a6 20%,#365872eb 78%,#f4fffff2 100%);box-shadow:.6px 0 0 #ffffff73}
+.sunshower-sun{animation:sunshower-light-drift 9s ease-in-out infinite alternate}
+.sunshower-orb:after{animation:sunshower-bloom 5s ease-in-out infinite alternate}
+.sunshower-rays{animation-duration:9s;background:conic-gradient(from 150deg at 73% 0%,transparent 0deg,#f5e7c833 7deg,transparent 12deg,#f5e7c845 22deg,transparent 30deg,#f5e7c82b 38deg,transparent 49deg)}
+@keyframes sunshower-light-drift{from{transform:translate3d(-60px,25px,0) scale(.92);opacity:.55}to{transform:translate3d(45px,-20px,0) scale(1.12);opacity:1}}
+@keyframes sunshower-bloom{from{opacity:.35;transform:scale(.82)}to{opacity:1;transform:scale(1.2)}}
+@media(max-width:650px){.sunshower-rain i:nth-child(n+141){display:none}}
+
+/* The sun remains visible during the shower; its soft bloom supplies the daylight. */
+.sunshower-orb{right:clamp(24px,5vw,120px);top:88px;width:78px;height:78px;background:radial-gradient(circle,#fffef2 0%,#fff7d4 37%,#f3d791c9 60%,#efc87866 69%,transparent 75%);filter:blur(.8px);box-shadow:0 0 48px 22px #fff1bb66,0 0 105px 55px #eec56f33;animation:sunshower-orbit 7s ease-in-out infinite alternate}
+.sunshower-orb:after{inset:-70px;filter:blur(15px)}
+@media(max-width:650px){.sunshower-orb{right:20px;top:78px;width:52px;height:52px;box-shadow:0 0 36px 15px #fff1bb59,0 0 75px 30px #eec56f2e}.sunshower-orb:after{inset:-45px}}
+/* Mist-blue / grey lake-blue surfaces with daylight used only as a warm accent. */
+:root{--ink:#304e60;--muted:#6d8795;--line:#cbdce4;--accent:#587e93;background:#e3edf2}
+body{background:#e3edf2;color:#304e60}
+.sunshower-background{background:radial-gradient(ellipse at 95% 3%,#f7efd447,transparent 36%),radial-gradient(ellipse at 12% 65%,#9bb9ca3d,transparent 56%),linear-gradient(140deg,#e9f1f466,#d2e2e96b)}
+.sunshower-cloudlight{background:linear-gradient(135deg,#5c7e9138,#688e9c2b)}
+.sunshower-sun{background:radial-gradient(circle,#fff7e25c 0%,#eedcaa2b 30%,#f8edcd14 50%,transparent 68%)}
+.sunshower-rays{background:conic-gradient(from 150deg at 73% 0%,transparent 0deg,#fff4db29 7deg,transparent 12deg,#fff4db38 22deg,transparent 30deg,#fff4db20 38deg,transparent 49deg)}
+.sunshower-orb{background:radial-gradient(circle,#fffef6 0%,#fff8e1 37%,#f3dfb4c9 60%,#e6d2aa66 69%,transparent 75%);box-shadow:0 0 48px 22px #fff5d866,0 0 105px 55px #eadab82e}
+.sunshower-orb:after{background:radial-gradient(circle,#fff9e599 0%,#f3e4bf55 36%,transparent 72%)}
+canvas.sunshower-rain{position:absolute;inset:0;width:100%;height:100%;transform:none;pointer-events:none}
+/* Pre-tinted translucency keeps the glass edges and depth without re-blurring
+   the animated rain separately for every card on every frame. */
+.drama-hero,.core-metric,.core-metric:has(.weibo-counts),.core-metric:has(.douban-counts),
+.milestone-panel,.overview-highlights .broadcast-panel,.solo-chart,.dengta-hourly-panel,
+.single-app .chart-panel,.single-app .stat-card,.single-app .detail-head{
+ background:linear-gradient(135deg,#f8fdffe8 0%,#eef6facf 46%,#dbeaf1cc 100%);
+ -webkit-backdrop-filter:none;backdrop-filter:none;
+ border-color:#f5fcffe0;border-right-color:#e2f1f899;border-bottom-color:#9bb7c459;
+ box-shadow:inset 0 1px 0 #fff,inset 1px 0 0 #ffffff66,inset 0 -1px 0 #f2faff66,0 8px 24px #3c647712,0 2px 4px #3c647708;
+}
+.core-metric:hover{background:linear-gradient(135deg,#ffffffd6,#eff7fba8 50%,#dcebf38c);border-color:#fff;box-shadow:inset 0 1px 0 #fff,0 11px 25px #426b7f1a}
+.core-metric:before{background:linear-gradient(115deg,#ffffff26,transparent 38%,transparent 70%,#bfd8e319)}
+.hero-copy h1,.dashboard-section-title h2,.single-trend-controls h2{color:#355569}
+.hero-cast span,.hero-synopsis p{color:#597586}.hero-copy .hero-kicker,.hero-cast h2,.hero-synopsis h2{color:#78919f}
+.core-value,.core-value.missing{color:#31566d}.core-metric h3{color:#5c7b8e}.core-label,.core-metric p,.rank-date{color:#6b8798}
+.core-value small,.weibo-counts,.douban-counts{color:#6d8798}.weibo-counts b,.douban-counts b,.kuyun-card-stats b{color:#4d7188}
+.metric-rank{background:#d5e6ef99;border-color:#f6fcffb3;color:#557c91}.platform-glyph{color:#5a8096;background:linear-gradient(140deg,#ffffffb3,#c5dfe95c)}
+.milestone-feature{background:linear-gradient(115deg,#f4ecd7b3,#e7dcc280);border-color:#fff8e8c7;color:#82724c}
+.milestone-panel h2,.broadcast-heading h2,.solo-chart h3,.dengta-hourly-panel h3{color:#496c80}
+.milestone-list b,.broadcast-content p{color:#617f90}.broadcast-reading strong,.broadcast-stats b{color:#507f96}
+.episode-track progress::-webkit-progress-value{background:linear-gradient(90deg,#88adbf,#c6bea4)}
+.episode-track progress::-moz-progress-bar{background:linear-gradient(90deg,#88adbf,#c6bea4)}
+.hero-broadcast,.drama-hero .episode-track,.single-trend-controls{border-color:#b4cbd64a}
+.single-app .segmented{background:#dceaf075;border-color:#eef9ffb3}.single-app .segmented button.on{background:#f8fcff;color:#4a7189}
+.single-app select,.source-strip button{background:#f2f8fbb3;color:#55798f;border-color:#eef8ffcc}
+.site-header{border-color:#bdd0da66}.site-header nav button.active{color:#426b81}.site-header nav button.active:after{background:#7da1b5}
+.site-footer .refresh{background:#dbeaf0;color:#50788b;border-color:#c0d7e1}
+@media(max-width:650px){.sunshower-orb{box-shadow:0 0 36px 15px #fff5d859,0 0 75px 30px #eadab829}}
+
+/* Clear lake-blue type and brighter chart accents against the misted glass. */
+:root{--ink:#42728a;--muted:#607f91;--accent:#328faf}
+body{color:var(--ink)}
+.wordmark,.hero-copy h1,.dashboard-section-title h2,.single-trend-controls h2{color:#3d748e}
+.core-value,.core-value.missing,.broadcast-reading strong,.broadcast-stats b,
+.trend-readouts b,.hourly-summary b,.single-app .stat-card>b{color:#337c9c}
+.core-label,.core-metric h3,.core-value small,.dengta-share>span,
+.hero-cast span,.hero-synopsis p,.hero-tags span,.hero-tags b,
+.milestone-list b,.broadcast-content p,.kuyun-card-stats{color:#54788d}
+.core-metric p,.rank-date,.weibo-reading-label,.weibo-counts,.douban-counts,
+.solo-chart header p,.dengta-hourly-panel header p,.hourly-notice,
+.trend-readouts small,.trend-readouts em,.hourly-summary span,.hourly-summary small,
+.solo-chart-foot,.chart-note,.single-trend-controls p,.site-footer,
+.single-app .section-head p,.single-app .stat-card>small{color:#607f91}
+.weibo-counts b,.douban-counts b,.kuyun-card-stats b,.dengta-share>b{color:#397e9c}
+.milestone-panel h2,.broadcast-heading h2,.solo-chart h3,.dengta-hourly-panel h3,
+.single-app .detail-head h2,.single-app .section-head h3{color:#447d96}
+.metric-rank{color:#387b99;background:#e3f1f7b3}
+.hourly-forecast-value>b,.hero-broadcast b{color:#a08045}
+.dengta-combined .core-label{margin-bottom:11px}
+.dengta-combined .core-value{margin:7px 0 12px}
+.dengta-share{display:flex;align-items:baseline;justify-content:space-between;gap:6px;padding-top:10px;border-top:1px solid #a7c8d44d;font-size:11px}
+.dengta-share>b{font-size:23px;line-height:1.2;font-variant-numeric:tabular-nums;white-space:nowrap}
+.dengta-share small{font-size:11px;margin-left:4px}
+.dengta-combined p{font-size:9px;line-height:1.5}
+/* Off-canvas daylight and a soft trace of refracted colour, never a sun disc
+   or a rainbow sticker in front of the navigation and readings. */
+.sunshower-sun{left:auto;right:-320px;top:-620px;width:1000px;height:1000px;background:radial-gradient(ellipse,#fff3d38c 0%,#f8ebcd40 35%,transparent 66%);animation-duration:16s}
+.sunshower-rainbow{right:-160px;top:-100px;width:360px;filter:blur(5px);mask-image:linear-gradient(90deg,transparent,#000 50%)}
+.sunshower-rainbow svg{mask-image:linear-gradient(to bottom,transparent 22%,#000 52%,transparent 94%)}
+@keyframes sunshower-weather-rainbow{0%,44%{opacity:0}62%,76%{opacity:.35}94%,100%{opacity:0}}
+@media(max-width:650px){
+ .sunshower-sun{right:-250px;top:-430px;width:650px;height:650px}
+ .sunshower-rainbow{right:-170px;top:-95px;width:300px;filter:blur(5px)}
+}
+@media(max-width:760px){
+ .dengta-combined h3 .metric-rank{display:inline-block;margin:0 0 0 4px;font-size:8px}
+ .dengta-share{flex-wrap:wrap;gap:4px}.dengta-share>b{font-size:21px}
+}
