@@ -4,6 +4,8 @@ from datetime import datetime, timedelta, timezone
 import hashlib
 import json
 import math
+import os
+import logging
 from urllib.parse import unquote, urlsplit
 
 from backend.dramas import PRIMARY, baidu_index
@@ -14,9 +16,10 @@ SCOPE='百度关键词搜索指数 · 全国 · PC+移动'
 # trendChart is search; trendChart2 is news, and the thumbnail charts are separate.
 CHART_SCRIPT=r"""(() => {
  const v=document.querySelector('.index-trend-view')?.__vue__;
- if(!v)return {url:location.href,ready:false,loginRequired:/扫码登录|手机号\/用户名\/邮箱/.test(document.body.innerText)};
+ const loginRequired=/扫码登录|手机号\/用户名\/邮箱/.test(document.body.innerText);
+ if(!v)return {url:location.href,ready:false,loginRequired};
  const o=v.trendChart?.getOption();
- return {url:location.href,ready:!v.chartLoading&&!!o,title:v.wordKey,area:v.area,device:v.deviceSelect,
+ return {url:location.href,ready:!v.chartLoading&&!!o,loginRequired,title:v.wordKey,area:v.area,device:v.deviceSelect,
    dates:o?.xAxis?.[0]?.data,series:o?.series?.map(s=>({name:s.name,data:s.data}))};
 })()"""
 
@@ -54,6 +57,8 @@ def parse_payload(payload,title=PRIMARY,current=None):
 
 async def collect_baidu_api(title=PRIMARY):
     from backend.browser_sources import browsers
+    if os.environ.get('GITHUB_ACTIONS')=='true' and not os.environ.get('BAIDU_INDEX_COOKIES','').strip():
+        return {'state':'login_required','message':'云端未配置百度登录会话，保留历史数据；需配置 BAIDU_INDEX_COOKIES Secret 后恢复采集','readings':[]}
     try:
         captured=await browsers.baidu_chart(title)
         if captured.get('verificationRequired'):
@@ -68,5 +73,6 @@ async def collect_baidu_api(title=PRIMARY):
         for row in rows:row['source_url']='http://127.0.0.1:8000/api/evidence/'+name
         return {'state':'ok','message':f"独立后台已采集关键词搜索指数 {len(rows)} 天，最新统计 {rows[-1]['source_time']}；全国 PC+移动，每15分钟检查",
                 'readings':rows,'page_url':baidu_index(title)}
-    except Exception:
+    except Exception as exc:
+        logging.getLogger(__name__).warning('Baidu collection failed: %s',type(exc).__name__)
         return {'state':'error','message':'百度独立后台采集失败，保留此前正确口径数据；不会调用日常 Chrome 或回退到其他指数','readings':[]}

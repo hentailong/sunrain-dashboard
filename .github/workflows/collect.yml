@@ -35,4 +35,6 @@ jobs:
           git -C public-data config user.name 'github-actions[bot]'
           git -C public-data config user.email '41898282+github-actions[bot]@users.noreply.github.com'
       - name: Collect and publish
+        env:
+          BAIDU_INDEX_COOKIES: ${{ secrets.BAIDU_INDEX_COOKIES }}
         run: python -m backend.actions_worker --data-dir public-data --minutes 330

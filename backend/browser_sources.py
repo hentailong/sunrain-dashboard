@@ -7,6 +7,8 @@ from __future__ import annotations
 
 import asyncio
 import math
+import json
+import os
 import sys
 import threading
 from datetime import datetime, timezone, timedelta
@@ -47,6 +49,20 @@ LABELS = {
     'marketShare': ('market_share', '%'),
     'rank': ('rank', '名'),
 }
+
+
+def baidu_session_cookies(raw: str) -> list[dict]:
+    """Accept only Baidu cookies; never include secret content in diagnostics."""
+    try:
+        cookies=json.loads(raw)
+        if not isinstance(cookies,list) or not cookies:raise ValueError()
+        for cookie in cookies:
+            domain=cookie.get('domain','').lstrip('.').lower()
+            if not (domain=='baidu.com' or domain.endswith('.baidu.com')):raise ValueError()
+            if not isinstance(cookie.get('name'),str) or not isinstance(cookie.get('value'),str):raise ValueError()
+        return cookies
+    except (ValueError,TypeError,AttributeError):
+        raise ValueError('Invalid Baidu session configuration') from None
 
 
 def numeric(value: Any) -> float | None:
@@ -193,6 +209,9 @@ class BrowserWorker:
                 self.visible.pop('baidu_index',None)
             context=await self.context('baidu_index',visible=False)
             try:
+                session=os.environ.get('BAIDU_INDEX_COOKIES','').strip()
+                if session:
+                    await context.add_cookies(baidu_session_cookies(session))
                 page=await context.new_page()
                 await page.goto(baidu_index(title_name),wait_until='domcontentloaded',timeout=30000)
                 redirected=False;captured={'ready':False}
@@ -203,13 +222,13 @@ class BrowserWorker:
                         if 'Execution context was destroyed' not in str(exc):raise
                         await page.wait_for_timeout(1000)
                         continue
+                    if captured.get('loginRequired'):
+                        return captured
                     if captured.get('ready') and captured.get('dates'):
                         return captured
                     text=await page.locator('body').inner_text()
                     if '安全验证' in text or '验证码' in text:
                         return {'ready':False,'verificationRequired':True}
-                    if captured.get('loginRequired'):
-                        return captured
                     if '/v2/index.html' in page.url and not redirected and attempt>=3:
                         await page.goto(baidu_index(title_name),wait_until='domcontentloaded',timeout=30000)
                         redirected=True

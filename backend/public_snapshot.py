@@ -35,6 +35,8 @@ def export_snapshot():
         state=source.get('state')
         row['message']=source.get('message','') if source['id']=='kuyun' else (
             '最近采集成功' if state=='ok' else '正在更新' if state=='running' else '来源本次未返回有效数据，保留历史读数')
+        if source['id']=='baidu_index' and state in ('login_required','verification_required'):
+            row['message']='百度登录会话不可用，暂未更新；保留历史数据' if state=='login_required' else '百度要求访问验证，暂未更新；保留历史数据'
         if source.get('broadcast'):
             row['broadcast']={k:v for k,v in source['broadcast'].items() if k!='announcement_url'}
         sources.append(row)

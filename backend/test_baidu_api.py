@@ -2,6 +2,8 @@ from datetime import datetime
 from pathlib import Path
 import tempfile
 import unittest
+import os
+import json
 from unittest.mock import patch, AsyncMock
 
 from backend import baidu_api as b
@@ -31,6 +33,37 @@ class ParserTests(unittest.TestCase):
             with self.subTest(changes=changes),self.assertRaises(ValueError):b.parse_payload(PAYLOAD|changes,TITLE,NOW)
 
 class RequestTests(unittest.IsolatedAsyncioTestCase):
+    async def test_cloud_without_session_reports_login_without_launching_browser(self):
+        with patch.dict(os.environ,{'GITHUB_ACTIONS':'true','BAIDU_INDEX_COOKIES':''}),patch.object(m.browsers,'baidu_chart',new_callable=AsyncMock) as chart:
+            result=await b.collect_baidu_api()
+            self.assertEqual(result['state'],'login_required')
+            self.assertEqual(result['readings'],[])
+            chart.assert_not_awaited()
+
+    async def test_cloud_cookies_are_applied_before_navigation(self):
+        from backend.browser_sources import BrowserWorker
+        worker=BrowserWorker();context=AsyncMock();page=AsyncMock()
+        context.new_page.return_value=page;page.evaluate.return_value=PAYLOAD
+        cookies=[{'name':'test','value':'private','domain':'.baidu.com','path':'/'}]
+        with patch.dict(os.environ,{'BAIDU_INDEX_COOKIES':json.dumps(cookies)}),patch.object(worker,'context',new_callable=AsyncMock,return_value=context):
+            self.assertEqual(await worker.baidu_chart(TITLE),PAYLOAD)
+        context.add_cookies.assert_awaited_once_with(cookies)
+        context.close.assert_awaited_once()
+
+    async def test_login_dialog_takes_priority_over_empty_chart_shell(self):
+        from backend.browser_sources import BrowserWorker
+        worker=BrowserWorker();context=AsyncMock();page=AsyncMock()
+        context.new_page.return_value=page;page.evaluate.return_value=PAYLOAD|{'loginRequired':True}
+        with patch.object(worker,'context',new_callable=AsyncMock,return_value=context):
+            result=await worker.baidu_chart(TITLE)
+        self.assertTrue(result['loginRequired'])
+
+    def test_session_validation_rejects_other_domains_without_exposing_values(self):
+        from backend.browser_sources import baidu_session_cookies
+        for raw in ['private-invalid-json','{}','[]',json.dumps([{'domain':'.evilbaidu.com','name':'test','value':'private'}])]:
+            with self.assertRaisesRegex(ValueError,'^Invalid Baidu session configuration$'):
+                baidu_session_cookies(raw)
+
     async def test_project_browser_chart_and_evidence(self):
         with tempfile.TemporaryDirectory() as folder,patch.object(b,'EVIDENCE',Path(folder)),patch.object(m.browsers,'baidu_chart',new_callable=AsyncMock,return_value=PAYLOAD) as chart:
             result=await b.collect_baidu_api()
