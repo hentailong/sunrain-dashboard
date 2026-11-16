@@ -279,14 +279,15 @@ body{color:var(--ink)}
 .single-app .detail-head h2,.single-app .section-head h3{color:#447d96}
 .metric-rank{color:#387b99;background:#e3f1f7b3}
 .hourly-forecast-value>b,.hero-broadcast b{color:#a08045}
+.dengta-combined{padding-top:18px;padding-bottom:18px}
 .dengta-combined .core-label{margin-bottom:7px}
 .dengta-combined .core-value{margin:5px 0 7px}
 .dengta-share{display:flex;align-items:baseline;justify-content:space-between;gap:6px;padding-top:6px;border-top:1px solid #a7c8d44d;font-size:11px}
 .dengta-share>b{font-size:19px;line-height:1.2;font-variant-numeric:tabular-nums;white-space:nowrap}
 .dengta-share small{font-size:11px;margin-left:4px}
 .dengta-combined p{font-size:9px;line-height:1.5;margin-top:6px}
-.dengta-average{border-top:0;padding-top:5px}
-.dengta-average>span>small{display:block;font-size:9px;margin:2px 0 0;color:#607f91}
+.dengta-average{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:0 4px;border-top:0;padding-top:5px}
+.dengta-average .dengta-average-date{grid-column:1/-1;font-size:9px;line-height:1.3;margin:2px 0 0;color:#607f91}
 .dengta-average>b{font-size:19px}
 /* Off-canvas daylight and a soft trace of refracted colour, never a sun disc
    or a rainbow sticker in front of the navigation and readings. */
@@ -316,5 +317,6 @@ body{color:var(--ink)}
 }
 @media(max-width:760px){
  .dengta-combined h3 .metric-rank{display:inline-block;margin:0 0 0 4px;font-size:8px}
- .dengta-share{gap:4px}.dengta-share>b{font-size:18px}
+ .dengta-share{gap:4px;font-size:10px}.dengta-share>b{font-size:16px}
+ .dengta-average{row-gap:0}
 }
