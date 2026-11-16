@@ -215,7 +215,7 @@ class BrowserWorker:
                 page=await context.new_page()
                 await page.goto(baidu_index(title_name),wait_until='domcontentloaded',timeout=30000)
                 redirected=False;captured={'ready':False}
-                for attempt in range(12):
+                for attempt in range(30):
                     try:
                         captured=await page.evaluate(CHART_SCRIPT)
                     except BrowserError as exc:
@@ -225,14 +225,19 @@ class BrowserWorker:
                     if captured.get('loginRequired'):
                         return captured
                     if captured.get('ready') and captured.get('dates'):
-                        return captured
+                        data=[value.get('value') if isinstance(value,dict) else value
+                              for series in captured.get('series',[]) if series.get('name')==title_name
+                              for value in series.get('data',[])]
+                        if any((numeric(value) or 0)>0 for value in data):
+                            return captured
+                        captured['emptyChart']=True
                     text=await page.locator('body').inner_text()
                     if '安全验证' in text or '验证码' in text:
                         return {'ready':False,'verificationRequired':True}
                     if '/v2/index.html' in page.url and not redirected and attempt>=3:
                         await page.goto(baidu_index(title_name),wait_until='domcontentloaded',timeout=30000)
                         redirected=True
-                    if attempt<11:await page.wait_for_timeout(1000)
+                    if attempt<29:await page.wait_for_timeout(1000)
                 return {'ready':False,'loginRequired':True} if '/v2/index.html' in page.url else captured
             finally:
                 await asyncio.wait_for(context.close(),timeout=10)

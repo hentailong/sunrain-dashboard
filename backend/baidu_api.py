@@ -52,6 +52,10 @@ def parse_payload(payload,title=PRIMARY,current=None):
                      'metadata':{'scope':SCOPE,'method':'official_rendered_chart','frequency':'daily','statistical_date':day.isoformat(),
                                  'keyword':title,'region_id':0,'device_source':'all','chart':'trendChart','series_kind':'keyword_search',
                                  'official_url':baidu_index(title)}})
+    # An established drama's entire window of zeros is also the site's empty
+    # chart placeholder. Individual zero days remain valid alongside real data.
+    if rows and not any(row['value']>0 for row in rows):
+        raise ValueError('Search chart contains only placeholder zeros')
     return sorted(rows,key=lambda r:r['source_time'])
 
 
@@ -65,6 +69,8 @@ async def collect_baidu_api(title=PRIMARY):
             return {'state':'verification_required','message':'百度要求访问验证，请在本项目独立采集窗口完成验证；不使用日常 Chrome','readings':[]}
         if captured.get('loginRequired'):
             return {'state':'login_required','message':'百度独立采集环境需要登录一次；请打开项目的官方登录窗口，完成后后台自动复用，不使用日常 Chrome','readings':[]}
+        if captured.get('emptyChart'):
+            return {'state':'no_data','message':'百度未返回有效搜索指数（整段为零），保留此前核验数据','readings':[]}
         rows=parse_payload(captured,title)
         if not rows:return {'state':'no_data','message':'百度关键词搜索图暂未返回有效数据，保留此前历史','readings':[]}
         content=json.dumps({'source':baidu_index(title),'captured_at':datetime.now(TZ).isoformat(),'chart':captured},ensure_ascii=False,indent=2)

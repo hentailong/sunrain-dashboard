@@ -4,7 +4,7 @@ import tempfile
 import unittest
 import os
 import json
-from unittest.mock import patch, AsyncMock
+from unittest.mock import patch, AsyncMock, Mock
 
 from backend import baidu_api as b
 from backend import main as m
@@ -21,7 +21,11 @@ class ParserTests(unittest.TestCase):
         self.assertEqual([r['source_time'] for r in rows],['2026-11-08','2026-11-09'])
         self.assertEqual(rows[-1]['value'],35380)
         self.assertEqual(rows[-1]['metadata']['series_kind'],'keyword_search')
-        self.assertEqual(b.parse_payload(PAYLOAD|{'series':[{'name':TITLE,'data':['0',None]}]},TITLE,NOW)[0]['value'],0)
+        self.assertEqual(b.parse_payload(PAYLOAD|{'series':[{'name':TITLE,'data':['0','35380']}]},TITLE,NOW)[0]['value'],0)
+
+    def test_all_zero_placeholder_cannot_overwrite_real_history(self):
+        with self.assertRaisesRegex(ValueError,'placeholder zeros'):
+            b.parse_payload(PAYLOAD|{'series':[{'name':TITLE,'data':[0,0]}]},TITLE,NOW)
 
     def test_brand_news_wrong_keyword_region_device_and_bad_values_rejected(self):
         for changes in [{'url':'https://index.baidu.com/v2/main/index.html#/brand/100679178'},
@@ -57,6 +61,18 @@ class RequestTests(unittest.IsolatedAsyncioTestCase):
         with patch.object(worker,'context',new_callable=AsyncMock,return_value=context):
             result=await worker.baidu_chart(TITLE)
         self.assertTrue(result['loginRequired'])
+
+    async def test_waits_past_zero_placeholder_for_real_chart(self):
+        from backend.browser_sources import BrowserWorker
+        worker=BrowserWorker();context=AsyncMock();page=AsyncMock()
+        context.new_page.return_value=page
+        page.locator=Mock(return_value=AsyncMock(inner_text=AsyncMock(return_value='搜索指数')))
+        page.url=b.baidu_index(TITLE)
+        page.evaluate.side_effect=[PAYLOAD|{'series':[{'name':TITLE,'data':[0,0]}]},PAYLOAD]
+        with patch.object(worker,'context',new_callable=AsyncMock,return_value=context):
+            result=await worker.baidu_chart(TITLE)
+        self.assertEqual(result,PAYLOAD)
+        self.assertEqual(page.evaluate.await_count,2)
 
     def test_session_validation_rejects_other_domains_without_exposing_values(self):
         from backend.browser_sources import baidu_session_cookies
