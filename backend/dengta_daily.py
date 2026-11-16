@@ -40,6 +40,11 @@ def parse_payload(payload,current):
         if day>current.date() or day in seen or plays is None or plays<0 or plays!=int(plays) or share is None or not 0<=share<=100:
             raise ValueError('日期、播放量或市占异常')
         seen.add(day);result.append({'day':day.isoformat(),'plays':int(plays),'share':share})
+        # The official episode average is independent of the daily play count.
+        # Today's row may not publish it yet; never derive it from totalVv.
+        average=number(row.get('avgEpVv'))
+        if average is not None and average>=0 and average==int(average):
+            result[-1]['episode_average']=int(average)
     if not result:raise ValueError('未返回逐日数据')
     return result
 
@@ -58,6 +63,7 @@ async def refresh_daily(path):
                 conn.execute('INSERT INTO dengta_daily VALUES(?,?,?,?,?) ON CONFLICT(day) DO UPDATE SET plays=excluded.plays,share=excluded.share,collected_at=excluded.collected_at,source_url=excluded.source_url',
                              (row['day'],row['plays'],row['share'],current.isoformat(),url))
             conn.execute("INSERT INTO dengta_daily_status VALUES(1,'ok','已更新官方逐日数据',?) ON CONFLICT(id) DO UPDATE SET state=excluded.state,message=excluded.message,last_success=excluded.last_success",(current.isoformat(),))
+        return [row | {'source_url':url} for row in rows]
     except (httpx.HTTPError,ValueError,TypeError,KeyError) as exc:
         with closing(sqlite3.connect(path)) as conn,conn:
             conn.execute("INSERT INTO dengta_daily_status VALUES(1,'error',?,NULL) ON CONFLICT(id) DO UPDATE SET state=excluded.state,message=excluded.message",('官方逐日数据更新失败，保留此前历史：'+type(exc).__name__,))

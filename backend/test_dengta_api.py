@@ -104,6 +104,7 @@ class DengtaStorageTests(unittest.IsolatedAsyncioTestCase):
     @patch.object(m, 'refresh_hourly', new_callable=AsyncMock)
     @patch.object(m, 'refresh_daily', new_callable=AsyncMock)
     async def test_shared_board_scheduler_and_failure_preserves_previous_values(self, daily, hourly):
+        daily.return_value=None
         results = {title: {'state': 'ok', 'message': '已更新',
             'readings': d.parse_payload(PAYLOAD, title, current=NOW)} for title in d.DRAMAS}
         with patch.object(m, 'collect_dengta_api', new_callable=AsyncMock, return_value=results) as request, \
@@ -122,6 +123,32 @@ class DengtaStorageTests(unittest.IsolatedAsyncioTestCase):
             self.assertTrue(source['automatic'])
             self.assertEqual(source['state'], 'restricted')
             self.assertFalse(m.calculate_forecast('dengta', 'dengta_play_count', 24, title)['available'])
+
+    async def test_episode_average_latest_published_day_revisions_and_snapshot_restore(self):
+        from contextlib import closing
+        from backend import public_snapshot as public
+        rows=[{'day':'2026-11-16'},
+              {'day':'2026-11-15','episode_average':7100616,'source_url':d.PAGE},
+              {'day':'2026-11-14','episode_average':6928691,'source_url':d.PAGE}]
+        # Deliberately collected over three days ago to exercise public retention.
+        with patch.object(m,'now',return_value=NOW):
+            m.store_dengta_episode_average(rows)
+        m.store_dengta_episode_average(rows)
+        m.store_dengta_episode_average(rows[2:])
+        m.store_dengta_episode_average(None)
+        with closing(m.db()) as conn:
+            self.assertEqual(conn.execute("SELECT COUNT(*) FROM observations WHERE metric='dengta_episode_average'").fetchone()[0],1)
+        reading=next(r for r in m.get_latest('dengta') if r['metric']=='dengta_episode_average')
+        self.assertEqual((reading['value'],reading['source_time']),(7100616,'2026-11-15'))
+        self.assertNotIn('sample_minute',reading['metadata'])
+        snapshot=public.export_snapshot()
+        self.assertEqual(snapshot['series']['dengta'][0]['time'],'2026-11-15')
+        with closing(m.db()) as conn,conn:conn.execute('DELETE FROM observations')
+        public.restore_snapshot(snapshot)
+        self.assertEqual(m.get_latest('dengta')[0]['value'],7100616)
+        revised=rows[1]|{'episode_average':7100700}
+        m.store_dengta_episode_average([revised])
+        self.assertEqual(m.get_latest('dengta')[0]['value'],7100700)
 
 
 if __name__ == '__main__':

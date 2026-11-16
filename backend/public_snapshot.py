@@ -16,7 +16,7 @@ META = {'scope','frequency','statistical_date','resets_daily','sample_minute','r
 def public_series(source):
     cutoff=(m.now()-timedelta(days=3)).isoformat()
     return [reading(r) for r in m.series(source,hours=720,all_history=True)
-            if r['metric']!='availability' and not ((source=='dengta' or r['metric'] in ('kuyun_live_rating','kuyun_live_share','kuyun_history_rating'))
+            if r['metric']!='availability' and not (((source=='dengta' and r['metric']!='dengta_episode_average') or r['metric'] in ('kuyun_live_rating','kuyun_live_share','kuyun_history_rating'))
                 and (r.get('collected_at') if source=='dengta' else r['time'])<cutoff)]
 
 

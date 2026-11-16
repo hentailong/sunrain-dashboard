@@ -17,7 +17,7 @@ def nearest_minute(value: str, statistical_date: str | None = None) -> str:
 def normalize_history(conn) -> int:
     """Idempotent metadata migration; raw values and original times stay intact."""
     changed = 0
-    for row in conn.execute("SELECT id,collected_at,metadata_json FROM observations WHERE source='dengta'").fetchall():
+    for row in conn.execute("SELECT id,collected_at,metadata_json FROM observations WHERE source='dengta' AND metric!='dengta_episode_average'").fetchall():
         meta = json.loads(row['metadata_json'] or '{}')
         if meta.get('sample_minute'):
             continue

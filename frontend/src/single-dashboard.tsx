@@ -34,6 +34,7 @@ const escapeHtml=(v:string)=>v.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>
 function DengtaCard({source}:{source?:Source}){
  const play=source?.metrics?.find(m=>m.metric==='dengta_play_count');
  const share=source?.metrics?.find(m=>m.metric==='dengta_play_share');
+ const average=source?.metrics?.find(m=>m.metric==='dengta_episode_average');
  const rank=source?.metrics?.find(m=>m.metric==='dengta_play_rank');
  const sameDate=!!play&&!!rank&&(play.source_time||play.collected_at).slice(0,10)===(rank.source_time||rank.collected_at).slice(0,10);
  const playTime=play?.source_time||play?.collected_at,shareTime=share?.source_time||share?.collected_at;
@@ -42,6 +43,7 @@ function DengtaCard({source}:{source?:Source}){
   <h3>今日正片播放量{sameDate&&rank?.value!=null&&<span className="metric-rank">第 {rank.value} 名</span>}</h3>
   <div className={`core-value ${play?.value==null?'missing':''}`}>{metricValue(play?.value,'dengta_play_count')}<small>{play?.value!=null?play.unit:''}</small></div>
   <div className="dengta-share"><span>实时播放市占</span><b>{metricValue(share?.value,'dengta_play_share')}<small>{share?.value!=null?share.unit:''}</small></b></div>
+  <div className="dengta-share dengta-average"><span>集均播放量{average?.source_time&&<small>统计 {shortTime(average.source_time)}</small>}</span><b>{metricValue(average?.value,'dengta_episode_average')}<small>{average?.value!=null?average.unit:''}</small></b></div>
   <p>{playTime?`统计 ${shortTime(playTime)}`:'暂无播放量数据'}{shareTime&&shareTime!==playTime&&<><br/>市占统计 {shortTime(shareTime)}</>}{!sameDate&&rank?.value!=null&&<><br/>第 {rank.value} 名 · {shortTime(rank.source_time||rank.collected_at)}</>}</p>
   {source?.state!=='ok'&&(play?.value!=null||share?.value!=null)&&<small className="stale-reading">保留上次成功读数</small>}
  </div>;

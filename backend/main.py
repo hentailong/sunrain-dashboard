@@ -157,7 +157,7 @@ def save_observation(source: str, metric: str, value: float | None, unit: str, u
     conn = db()
     captured_at = now().isoformat()
     metadata = dict(metadata or {})
-    if source == 'dengta':
+    if source == 'dengta' and metric != 'dengta_episode_average':
         metadata.setdefault('sample_minute', nearest_minute(captured_at, metadata.get('statistical_date')))
     if source_time and source != 'dengta':
         previous = conn.execute('SELECT value FROM observations WHERE drama=? AND source=? AND metric=? AND source_time=? ORDER BY collected_at DESC LIMIT 1', (drama,source,metric,source_time)).fetchone()
@@ -234,6 +234,22 @@ source_locks = {key:asyncio.Lock() for key in SOURCES}
 browser_limit = asyncio.Semaphore(1)
 
 
+def store_dengta_episode_average(rows):
+    published=[row for row in (rows or []) if row.get('episode_average') is not None]
+    if not published:
+        return
+    latest=max(published,key=lambda row:row['day'])
+    conn=db()
+    previous=conn.execute("SELECT source_time,value FROM observations WHERE source='dengta' AND metric='dengta_episode_average' AND drama=? ORDER BY source_time DESC,collected_at DESC LIMIT 1",(TITLE,)).fetchone()
+    conn.close()
+    if previous and (previous['source_time']>latest['day'] or
+                     (previous['source_time']==latest['day'] and previous['value']==latest['episode_average'])):
+        return
+    save_observation('dengta','dengta_episode_average',latest['episode_average'],'次',
+                     latest['source_url'],latest['day'],
+                     {'statistical_date':latest['day'],'frequency':'daily','scope':'灯塔官方集均播放量'},drama=TITLE)
+
+
 async def collect_one(source: str) -> bool:
     if source not in SOURCES:
         return False
@@ -258,7 +274,7 @@ async def collect_one(source: str) -> bool:
                                message=f'{SOURCES[source]["name"]}剧集榜采集失败，保留上次成功数据；稍后自动重试',drama=drama)
             if source == 'dengta':
                 await refresh_hourly(DB_PATH)
-                await refresh_daily(DB_PATH)
+                store_dengta_episode_average(await refresh_daily(DB_PATH))
             return True
         for drama in DRAMAS:
             if source == 'mango':
@@ -442,7 +458,7 @@ def series(source: str, metric: str | None = None, hours: int = Query(168, ge=1,
     rows = conn.execute(query, params).fetchall(); conn.close()
     rows = [dict(row) for row in rows]
     if source == 'dengta':
-        rows = minute_rows(rows)
+        rows = minute_rows([r for r in rows if r['metric']!='dengta_episode_average']) + [r for r in rows if r['metric']=='dengta_episode_average']
     if source == 'maoyan':
         rows = [r for r in rows if r['metric']!='daily_heat'] + maoyan_daily_points([r for r in rows if r['metric']=='daily_heat'],now())
         rows.sort(key=lambda r:(r['source_time'] or r['collected_at'],r['collected_at']))
