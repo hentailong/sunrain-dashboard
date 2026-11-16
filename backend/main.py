@@ -305,6 +305,13 @@ def get_latest(source: str | None = None, drama: str = TITLE) -> list[dict[str, 
             SELECT id FROM (SELECT id,ROW_NUMBER() OVER (
                 PARTITION BY metric ORDER BY source_time DESC,collected_at DESC,id DESC) AS revision
                 FROM observations WHERE source='yunhe' AND drama=?) WHERE revision=1)""",(drama,)).fetchall())
+    if source in (None,'baidu_index'):
+        # Restored batches can share a collection timestamp; the newest official
+        # statistical day must still be the one shown on the overview card.
+        rows=[r for r in rows if r['source']!='baidu_index']
+        daily=conn.execute("SELECT * FROM observations WHERE source='baidu_index' AND metric='search_index' AND drama=? ORDER BY source_time DESC,collected_at DESC,id DESC LIMIT 1",(drama,)).fetchone()
+        if daily:
+            rows.append(daily)
     if source in (None,'maoyan'):
         # The daily card and comparison must use the same finished-day scope
         # as the daily chart, while the snapshot card carries today's value.

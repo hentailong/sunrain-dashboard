@@ -120,6 +120,12 @@ class IntegrationTests(unittest.IsolatedAsyncioTestCase):
     setUp=storage.StorageTests.setUp
     tearDown=storage.StorageTests.tearDown
 
+    def test_backfilling_older_day_does_not_replace_latest_card(self):
+        for day,value in [('2026-11-15',56864),('2026-11-11',36993)]:
+            m.save_observation('baidu_index','search_index',value,'指数',b.baidu_index(TITLE),day)
+        self.assertEqual(m.get_latest('baidu_index')[0]['value'],56864)
+        self.assertEqual(next(r for r in m.get_latest() if r['source']=='baidu_index')['source_time'],'2026-11-15')
+
     async def test_corrected_scope_and_failure_preserve_only_keyword_values(self):
         m.save_observation('baidu_index','search_index',82826,'指数','https://index.baidu.com/',
                            '2026-11-09',{'entity_id':'100679178','endpoint':'/insight/brand/queryBrandSearchIndex'})
